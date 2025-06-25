@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestational Age Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 80px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.6em;
+            margin-bottom: 10px;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .form-section {
+            padding: 40px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1976d2;
+            font-size: 1em;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e3f2fd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #1976d2;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            white-space: nowrap;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(25, 118, 210, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border-radius: 10px;
+            border-left: 5px solid #1976d2;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #1976d2;
+            flex: 1;
+        }
+
+        .result-value {
+            font-weight: 600;
+            color: #333;
+            font-size: 1em;
+        }
+
+        .info-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(calc(100% - 60px));
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .info-section.expanded {
+            transform: translateY(0);
+        }
+
+        .info-toggle {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1em;
+            user-select: none;
+        }
+
+        .info-toggle:hover {
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+        }
+
+        .info-content {
+            padding: 25px;
+            background: #f8f9fa;
+        }
+
+        .info-content h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .info-content p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            font-size: 1.2em;
+        }
+
+        .info-section.expanded .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 5px solid #c62828;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .form-section {
+                padding: 25px;
+            }
+            
+            .header {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gestational Age Calculator</h1>
+        </div>
+
+        <div class="form-section">
+            <form id="gestationalForm">
+                <div class="input-group">
+                    <label for="lmp">Last Menstrual Period (LMP)</label>
+                    <input type="date" id="lmp" name="lmp" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="cycleLength">Menstrual Cycle Length (days)</label>
+                    <select id="cycleLength" name="cycleLength" required>
+                        <option value="">Select cycle length</option>
+                        <option value="21">21 days</option>
+                        <option value="22">22 days</option>
+                        <option value="23">23 days</option>
+                        <option value="24">24 days</option>
+                        <option value="25">25 days</option>
+                        <option value="26">26 days</option>
+                        <option value="27">27 days</option>
+                        <option value="28" selected>28 days (Standard)</option>
+                        <option value="29">29 days</option>
+                        <option value="30">30 days</option>
+                        <option value="31">31 days</option>
+                        <option value="32">32 days</option>
+                        <option value="33">33 days</option>
+                        <option value="34">34 days</option>
+                        <option value="35">35 days</option>
+                        <option value="36">36 days</option>
+                        <option value="37">37 days</option>
+                        <option value="38">38 days</option>
+                        <option value="39">39 days</option>
+                        <option value="40">40 days</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="calculate-btn">Calculate Gestational Age & EDD</button>
+            </form>
+
+            <div id="error" class="error"></div>
+
+            <div id="results" class="results">
+                <div class="result-item">
+                    <span class="result-label">Current Gestational Age:</span>
+                    <span id="gestationalAge" class="result-value"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Expected Date of Delivery (EDD):</span>
+                    <span id="edd" class="result-value"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Days Pregnant:</span>
+                    <span id="daysPregnant" class="result-value"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Estimated Conception Date:</span>
+                    <span id="conceptionDate" class="result-value"></span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Trimester:</span>
+                    <span id="trimester" class="result-value"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section" id="infoSection">
+            <div class="info-toggle" onclick="toggleInfoSection()">
+                <span>About This Calculator</span>
+                <span class="toggle-icon">▲</span>
+            </div>
+            <div class="info-content">
+                <h3>About This Calculator</h3>
+                <p><strong>ACOG Guidelines:</strong> This calculator follows the American College of Obstetricians and Gynecologists (ACOG) recommendations for calculating gestational age and expected delivery date.</p>
+                <p><strong>Naegele's Rule:</strong> EDD is calculated by adding 280 days (40 weeks) to the LMP, adjusted for cycle length variations.</p>
+                <p><strong>Cycle Adjustment:</strong> For cycles other than 28 days, the calculation adjusts the estimated ovulation date accordingly.</p>
+                <p><strong>Clinical Use:</strong> This tool is for educational purposes. Always consult healthcare providers for clinical decisions.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('gestationalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateGestationalAge();
+        });
+
+        function calculateGestationalAge() {
+            const lmpInput = document.getElementById('lmp').value;
+            const cycleLength = parseInt(document.getElementById('cycleLength').value);
+            const errorDiv = document.getElementById('error');
+            const resultsDiv = document.getElementById('results');
+
+            // Clear previous errors
+            errorDiv.classList.remove('show');
+            resultsDiv.classList.remove('show');
+
+            if (!lmpInput || !cycleLength) {
+                showError('Please enter both Last Menstrual Period date and cycle length.');
+                return;
+            }
+
+            const lmpDate = new Date(lmpInput);
+            const today = new Date();
+
+            // Validate LMP date
+            if (lmpDate > today) {
+                showError('Last Menstrual Period date cannot be in the future.');
+                return;
+            }
+
+            // Check if LMP is too far in the past (more than 42 weeks)
+            const daysDiff = Math.floor((today - lmpDate) / (1000 * 60 * 60 * 24));
+            if (daysDiff > 294) { // 42 weeks = 294 days
+                showError('Last Menstrual Period date seems too far in the past for current pregnancy.');
+                return;
+            }
+
+            // Calculate gestational age based on LMP
+            const gestationalDays = daysDiff;
+            const gestationalWeeks = Math.floor(gestationalDays / 7);
+            const remainingDays = gestationalDays % 7;
+
+            // Calculate EDD using Naegele's rule with cycle adjustment
+            // Standard Naegele's rule: LMP + 280 days
+            // Adjustment: (cycle length - 28) days
+            const cycleAdjustment = cycleLength - 28;
+            const eddDate = new Date(lmpDate);
+            eddDate.setDate(eddDate.getDate() + 280 + cycleAdjustment);
+
+            // Calculate estimated conception date
+            // Ovulation typically occurs 14 days before next period
+            // For non-28 day cycles, adjust ovulation timing
+            const ovulationDay = cycleLength - 14;
+            const conceptionDate = new Date(lmpDate);
+            conceptionDate.setDate(conceptionDate.getDate() + ovulationDay);
+
+            // Determine trimester
+            let trimester;
+            if (gestationalWeeks < 13) {
+                trimester = 'First Trimester';
+            } else if (gestationalWeeks < 28) {
+                trimester = 'Second Trimester';
+            } else {
+                trimester = 'Third Trimester';
+            }
+
+            // Display results
+            document.getElementById('gestationalAge').textContent = 
+                `${gestationalWeeks} weeks, ${remainingDays} days`;
+            
+            document.getElementById('edd').textContent = 
+                eddDate.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            
+            document.getElementById('daysPregnant').textContent = `${gestationalDays} days`;
+            
+            document.getElementById('conceptionDate').textContent = 
+                conceptionDate.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            
+            document.getElementById('trimester').textContent = trimester;
+
+            resultsDiv.classList.add('show');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        // Set max date for LMP input to today
+        document.getElementById('lmp').max = new Date().toISOString().split('T')[0];
+
+        function toggleInfoSection() {
+            const infoSection = document.getElementById('infoSection');
+            infoSection.classList.toggle('expanded');
+        }
+    </script>
+</body>
+</html>
